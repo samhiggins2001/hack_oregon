@@ -9,10 +9,6 @@ fins = read.table(header=T, comment.char="",stringsAsFactors=F,
 cat("Data dimensions:")
 print(dim(fins))
 
-
-
-
-
 colnames(fins)
 # > colnames(fins)
 # [1] "Tran.Id"                        "Original.Id"                   
@@ -37,7 +33,6 @@ colnames(fins)
 # [39] "Zip.Plus.Four"                  "County"                        
 # [41] "Purpose.Codes"                  "Exp.Date" 
 summary(object=fins)
-
 
 tabsums = list()
 
