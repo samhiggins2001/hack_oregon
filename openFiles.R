@@ -80,9 +80,11 @@ importAllXLSFiles<-function(indir="~/prog/hack_oregon/orestar/fins",
 }
 	
 addToErrorLog<-function(vals, errorLogFname){
+	
 	if(dirname(errorLogFname)!="."&!file.exists(dirname(errorLogFname))){
 		dir.create(path=dirname(errorLogFname), showWarnings=F, recursive=T)
 	}
+	
 	if(file.exists(errorLogFname)){
 		elog = read.table(file=errorLogFname, 
 											header=F, 
