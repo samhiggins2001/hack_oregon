@@ -1,9 +1,11 @@
 #eda.R
 
 
-fins = read.table(header=T, comment.char="",stringsAsFactors=F,
-					 sep="\t",
-					 file="./orestar/fins/joinedTables.tsv")
+fins = read.table(header=T, 
+									comment.char="",
+									stringsAsFactors=F,
+					 				sep="\t",
+					 				file="./orestar/fins/joinedTables.tsv")
 
 
 cat("Data dimensions:")
@@ -42,6 +44,191 @@ for(c in colnames(fins)){
 	print(length(tabsums[[c]]))
 	if(nrow(tabsums[[c]])<100) print( tabsums[[c]] )
 }
+
+
+
+
+hist(ftab$Amount[ftab$Amount<100000], 
+		 breaks=100, 
+		 main="Histogram of contribution amount",
+		 ylab="number of contributions",
+		 xlab="contribution amount")
+
+
+hist(log(ftab$Amount, base=10), 
+		 breaks=100, 
+		 main="Histogram of contribution amount",
+		 ylab="number of contributions",
+		 xlab="log10(contribution amount)")
+
+#data dictionary commands
+dim(ftab)
+colnames(ftab)
+colnames(ftab)
+length(unique(ftab$Tran.Id))
+dim(ftab)
+length(unique(ftab$Original.Id))
+unique(ftab$Tran.Status)
+table(ftab$Tran.Status)
+contTab = table(ftab$Contributor.Payee)
+length(contTab)
+max(contTab)
+contTab = order(contTab, decreasing=T)
+head(contTab)
+contTab
+contTab = order(contTab, decreasing=T)
+contTab = table(ftab$Contributor.Payee)
+contTab = contTab[order(contTab, decreasing=T)]
+head(contTab)
+length(contTa)
+length(contTab)
+dim(ftab)
+unique(ftab$Sub.Type)
+table(ftab$Sub.Type)
+table(ftab$Sub.Type)
+table(ftab$Sub.Type)
+table(ftab$Sub.Type)[order(table(ftab$Sub.Type))]
+table(ftab$Sub.Type)[order(table(ftab$Sub.Type), decreasing=T)]
+hist(ftab$Amount)
+hist(ftab$Amount, breaks=1000)
+hist(ftab$Amount, breaks=1000, main="Histogram of contribution amount",ylab="number of contributions",xlab="contribution amount")
+hist(ftab$Amount, breaks=100, main="Histogram of contribution amount",ylab="number of contributions",xlab="contribution amount")
+hist(ftab$Amount[ftab$Amount>100],
+breaks=100,
+main="Histogram of contribution amount",
+ylab="number of contributions",
+xlab="contribution amount")
+max(ftab$Amount)
+hist(ftab$Amount[ftab$Amount<1000000],
+breaks=100,
+main="Histogram of contribution amount",
+ylab="number of contributions",
+xlab="contribution amount")
+hist(ftab$Amount[ftab$Amount<100000],
+breaks=100,
+main="Histogram of contribution amount",
+ylab="number of contributions",
+xlab="contribution amount")
+min(ftab$Amount)
+range(ftab$Amount)
+range(ftab$Aggregate.Amount)
+hist(log(ftab$Amount),
+breaks=100,
+main="Histogram of contribution amount",
+ylab="number of contributions",
+xlab="contribution amount")
+hist(log(ftab$Amount, base=10),
+breaks=100,
+main="Histogram of contribution amount",
+ylab="number of contributions",
+xlab="contribution amount")
+hist(log(ftab$Amount, base=10),
+breaks=100,
+main="Histogram of contribution amount",
+ylab="number of contributions",
+xlab="contribution amount")
+hist(log(ftab$Amount, base=10),
+breaks=100,
+main="Histogram of contribution amount",
+ylab="number of contributions",
+xlab="log10(contribution amount)")
+unique(ftab$Contributor.Payee.Committee.ID)
+contab = table(ftab$Contributor.Payee.Committee.ID)
+contab = contab[order(contab)]
+head(contab)
+contab
+sum(ftab$Contributor.Payee.Committee.ID=="")
+sum(is.na(ftab$Contributor.Payee.Committee.ID))
+length(unique(ftab$Filer.Id))
+length(unique(ftab$Filer))
+length(unique(ftab$Attest.By.Name))
+unique(ftab$Attest.By.Name)
+unique(ftab$Review.By.Name)
+sum(is.na(ftab$Review.By.Name))
+sum(ftab$Review.By.Name=="")
+sum(ftab$Review.By.Name=="nanfer")
+sum(ftab$Review.By.Name=="nanfer", na.rm=T)
+sum(ftab$Review.By.Name=="", na.rm=T)
+length(unique(ftab$Review.Date))
+length(unique(ftab$Attest.Date))
+length(unique(ftab$Occptn.Ltr.Date))
+sum(is.na(ftab$Occptn.Ltr.Date))
+unique(ftab$Occptn.Ltr.Date)
+unique(ftab$Pymt.Sched.Txt)
+table(ftab$Pymt.Sched.Txt)
+unique(ftab$Filer)
+unique(ftab$Purp.Desc)
+purptab = table(ftab$Purp.Desc)
+sum(is.na(ftab$Purp.Desc))
+length(purptab)
+sum(ftab$Purp.Desc=="", na.rm=T)
+purptab = purptab[order(purptab,decreasing=T)]
+head(purptab)
+length(unique(ftab$Intrst.Rate))
+sum(ftab$Intrst.Rate=="", na.rm=T)
+sum(is.na(ftab$Intrst.Rate))
+sum(ftab$Pymt.Sched.Txt=="", na.rm=T)
+irtab = table(ftab$Intrst.Rate)
+
+irtab = irtab[order(names(irtab))]
+
+extab = ftab[(ftab$Intrst.Rate!=""),]
+
+sum(is.na(ftab$Intrst.Rate))
+sum(ftab$Intrst.Rate=="", na.rm=T)
+blanki = ftab$Intrst.Rate==""|is.na(ftab$Intrst.Rate)
+noni = ftab$Intrst.Rate%in%c("0","0.00%","-0-", "0 %", "0.", "0%", "0% Interest", "$o.oo","Zero","zero percent", "%0","non","none","None","o","O")
+blanki = blanki|noni
+
+extab = ftab[!blanki,]
+dim(extab)
+# [1] 1046   42
+extab[,c(1,8,9,20)]
+
+as.numeric(extab[,20])
+
+
+morei = extab[,20]>extab[,8]
+equali = extab[,20]=extab[,8]
+
+length(unique(ftab$Check.Nbr))
+
+
+
+
+isBlank(ftab$Check.Nbr)
+
+
+isBlank(col=ftab$Tran.Stsfd.Ind)
+
+isBlank(col=ftab$Filed.By.Name)
+length(unique(ftab$Filed.By.Name))
+head(unique(ftab$Filed.By.Name))
+head(unique(ftab$Filed.Date))
+length(unique(ftab$Filed.Date))
+
+ftab$Filed.Date
+
+
+for(cn in names(ftab)){
+	cat("\n\nCurrent column:", cn, "\n")
+	cur = ftab[[cn]]
+	
+	cat("Number of unique values in column:", length(unique(cur)), "\n")
+	cat(isBlank(cur),"values are blank\n")
+	cat("Here is a sample of the unique values found in this column:\n")
+	print(head(unique(cur)))
+	ctab = table(cur)[order(table(cur), decreasing=T)]
+	pctab = paste(ctab, names(ctab),  sep=" record(s) is/are equal to ")
+	cat("These are the numbers of times the 10 most common values occured:\n")
+	print(head(pctab, 10))
+}
+
+head(ftab[,c(3,24)], n=10)
+head(ftab[,c(32,33)])
+
+
+head(ftab[,c(grep(pattern="date", x=colnames(ftab), ignore.case=T))])
 
 
 
