@@ -4,8 +4,6 @@ if(!require("grDevices")){
 	library("grDevices")
 }
 
-
-
 test.fixVals<-function(){
 	
 	col="years"
@@ -106,12 +104,11 @@ breakByCont<-function(fin, breaks=c(50000,10000, 5000, 1000, 500, 100)){
 			outmat[as.character(breaks[i]),y] = total
 			cyear = cyear[!curi,]
 		}
-	}	
-	
+	}
 	
 	return(outmat)
+	
 }
-
 
 makeDonationSizeBarPlot <- function (fins) {
   fin=fins
@@ -127,4 +124,103 @@ makeDonationSizeBarPlot <- function (fins) {
   				xlab="year", col=rainbow(7),
   				legend = paste(rownames(outmat), "and above"))
 }
+
+
+#getFromToAmountTable
+getFromToAmountTable<-function(ftab, fromColName="Contributor.Payee.Committee.ID", toColName="Filer.Id", amountColName="Amount"){
+	
+	outTab = ftab[,c(fromColName, toColName, amountColName)]
+	
+	colnames(outTab)<-c("from", "to", "amount")
+	return(outTab)
+}
+
+#getMiddleMen
+#takes ftab: the fins table; campaing finance contributions; must have columns: Contributor.Payee.Committee.ID, Filer.Id and Amount 
+#returns: a vector of ids for all entities that both give and recieve donations
+getMiddleMen<-function(ftab){
+	
+	tfbyID = getFromToAmountTable(ftab) 
+	
+	blanki = tfbyID$from=="" | is.na(tfbyID$from)
+	
+	withFromIds = tfbyID[!blanki,]
+	wfrom = ftab[!blanki,]
+	
+	gs = withFromIds[,c(1,2)]
+	
+	#how many givers are also recievers?
+	
+	givers = unique(gs$from)
+	
+	recievers = unique(gs$to)
+	
+	gands = intersect(givers, recievers)
+
+	return(gands)
+}
+
+#isBlank
+#takes: col: vector of values to be checked for ("" or NA)
+#				retlv: T/F flag indictaing if a logical vector of blank indexes should be returned
+#returns the number of blank  ("" or NA) values or logical index of NA values
+isBlank<-function(col, retlv=F){
+	li = (is.na(col))|(col=="")
+	if(retlv) return(li)
+	return(sum(li, na.rm=T))
+}
+
+#get simple interaction format going
+
+tfbyID = getFromToAmountTable(ftab) 
+
+blanki = tfbyID$from=="" | is.na(tfbyID$from)
+
+withFromIds = tfbyID[!blanki,]
+wfrom = ftab[!blanki,]
+
+gs = withFromIds[,c(1,2)]
+
+#how many givers are also recievers?
+
+givers = unique(gs$from)
+
+recievers = unique(gs$to)
+
+gands = intersect(givers, recievers)
+
+length(gands)
+# > length(gands)
+# [1] 693 givers are also recievers
+
+#find the rows where they are givers
+
+grows = ftab[ftab$Contributor.Payee.Committee.ID%in%gands,] 
+#find the rows where they are recievers
+rrows = ftab[ftab$Filer.ID%in%gands,] 
+
+#check an individual value, 73
+#filer 73 is "Regence Oregon Political Action Committee"
+#look at the records of 73 recieving
+dim(ftab[ftab[,11]==73,])
+head(ftab[ftab[,11]==73,])
+#look at the records of them giving
+dim(ftab[ftab[,10]==73,])
+head(ftab[ftab$Contributor.Payee.Committee.ID=="73",])
+
+73%in%wfrom$Contributor.Payee.Committee.ID
+head(wfrom[wfrom$Contributor.Payee.Committee.ID==73,])
+
+
+
+
+
+
+
+
+
+
+
+
+
 
