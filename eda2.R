@@ -45,9 +45,6 @@ for(c in colnames(fins)){
 	if(nrow(tabsums[[c]])<100) print( tabsums[[c]] )
 }
 
-
-
-
 hist(ftab$Amount[ftab$Amount<100000], 
 		 breaks=100, 
 		 main="Histogram of contribution amount",
@@ -210,19 +207,7 @@ length(unique(ftab$Filed.Date))
 ftab$Filed.Date
 
 
-for(cn in names(ftab)){
-	cat("\n\nCurrent column:", cn, "\n")
-	cur = ftab[[cn]]
-	
-	cat("Number of unique values in column:", length(unique(cur)), "\n")
-	cat(isBlank(cur),"values are blank\n")
-	cat("Here is a sample of the unique values found in this column:\n")
-	print(head(unique(cur)))
-	ctab = table(cur)[order(table(cur), decreasing=T)]
-	pctab = paste(ctab, names(ctab),  sep=" record(s) is/are equal to ")
-	cat("These are the numbers of times the 10 most common values occured:\n")
-	print(head(pctab, 10))
-}
+
 
 head(ftab[,c(3,24)], n=10)
 head(ftab[,c(32,33)])
