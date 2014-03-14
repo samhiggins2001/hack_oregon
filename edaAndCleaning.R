@@ -50,6 +50,28 @@ fixVals<-function(bad, correct, col, tab){
 	
 }
 
+# col=dbres1$Contributor_Payee
+unifyEntities<-function(col){
+	
+	#remove punctuation
+	col = gsub(pattern="[().!~,*`/\\]",replacement=" ", x=col)
+	col = gsub(pattern="[-_]",replacement=" ", x=col)
+	#remove variants, like Inc.
+	col = gsub(pattern="Inc", replacement="", x=col)
+	#normalize 'and'
+	col = gsub(pattern="( and )|[+]", replacement="&", x=col, ignore.case=T)
+	col = gsub(pattern="&", replacement=" & ", x=col, ignore.case=T)
+	#remove white space
+	col = gsub(pattern="[ ]+", replacement=" ", x=col)
+	col = gsub(pattern="^ ", replacement="", x=col)
+	col = gsub(pattern=" $", replacement="", x=col)
+	col = gsub(pattern="\t", replacement=" ", x=col)
+	#make all the same case
+	col = toupper(x=col)
+	return(col)
+}
+
+
 cleanData<-function(fin){
 	fin = fin[!is.na(fin$Amount),]
 	
@@ -76,7 +98,6 @@ cleanData<-function(fin){
 							file=paste0(folderName, "/joinedTables.tsv"))
 	
 }
-
 
 #'@title breakByCont
 #'@description Makes matrix describing total political contributions by year from contributions in the ranges provided by the breaks arg.
@@ -110,30 +131,43 @@ breakByCont<-function(fin, breaks=c(50000,10000, 5000, 1000, 500, 100)){
 	
 }
 
-makeDonationSizeBarPlot <- function (fins) {
-  fin=fins
-  outmat = breakByCont(fin=fin)
-  # > outmat
-  # 2013     2012     2011     2010      2009     2008       2007       2006   2001 1998     2004     2005  2002
-  # 10000 7737241.8 48019407 10060205 54641095 8377918.9 68293791 10516806.2 2050769.06    0.0    0 69480.82 18588.00     0
-  # 1000  8488698.4 47623363 12713263 40577263 9787408.9 36890155  8209368.2 1737209.74    0.0    0  7500.00 10587.10 16500
-  # 100   6153385.8 21135550  9019292 20825367 7138285.7 19563522  5788032.3  913619.30 1064.5    0   873.02  5293.00     0
-  # 0      965955.5  2100138  1335687  1833081  899221.3  1532017   721525.4   79955.72    7.0   25   112.00  1332.08     0
-  barplot(outmat, main="contributions", 
-  				ylab="Dollar amount",
-  				xlab="year", col=rainbow(7),
-  				legend = paste(rownames(outmat), "and above"))
+
+CleanTableExBadRows<-function(tab){
+	print("Fixing the headers")
+	tab = fixHeaders(tab=tab)
+	print("Unifying the representation of not available values")
+	tab = unifyNAs(tab=tab)
+	#first find any rows without a transaction id
+	#second find all the rows where the amount cant be converted to numeric
+	print("Assuring Amount and Aggregate_Amount columns are of numeric types")
+	initialRows = nrow(tab)
+	tab$Amount = as.numeric(tab$Amount)
+	tab$Aggregate_Amount = as.numeric(tab$Aggregate_Amount)
+	tab = tab[!is.na(tab$Tran_Id)&(tab$Tran_Id!="")&!is.na(tab$Amount)&!is.na(tab$Aggregate_Amount),]
+	rowsLost =   initialRows - nrow(tab)
+	cat(rowsLost, "rows where lost be cleaning out rows without\nvalid contribution amounts or transaction IDs")
+	return(tab)
 }
 
-
-#getFromToAmountTable
-getFromToAmountTable<-function(ftab, fromColName="Contributor.Payee.Committee.ID", toColName="Filer.Id", amountColName="Amount"){
+unifyNAs<-function(tab){
 	
-	outTab = ftab[,c(fromColName, toColName, amountColName)]
+	tab[is.na(tab)] = NA
+	tab[tab=="NA"] = NA
+	tab[tab=="<NA>"] = NA
+	tab[tab==""]  = NA
+	tab[is.na(tab)] = ""
+	return(tab)
 	
-	colnames(outTab)<-c("from", "to", "amount")
-	return(outTab)
 }
+
+fixHeaders<-function(tab){
+	#strip leading ".X"
+	colnames(tab)<-gsub(pattern="^X.", replacement="", x=colnames(tab))
+	colnames(tab)<-gsub(pattern="[.]$", replacement="", x=colnames(tab))
+	colnames(tab)<-gsub(pattern="[.]", replacement="_", x=colnames(tab))
+	return(tab)
+}
+
 
 #getMiddleMen
 #takes ftab: the fins table; campaing finance contributions; must have columns: Contributor.Payee.Committee.ID, Filer.Id and Amount 
@@ -170,49 +204,52 @@ isBlank<-function(col, retlv=F){
 	return(sum(li, na.rm=T))
 }
 
-#get simple interaction format going
-
-tfbyID = getFromToAmountTable(ftab) 
-
-blanki = tfbyID$from=="" | is.na(tfbyID$from)
-
-withFromIds = tfbyID[!blanki,]
-wfrom = ftab[!blanki,]
-
-gs = withFromIds[,c(1,2)]
-
-#how many givers are also recievers?
-
-givers = unique(gs$from)
-
-recievers = unique(gs$to)
-
-gands = intersect(givers, recievers)
-
-length(gands)
-# > length(gands)
-# [1] 693 givers are also recievers
-
-#find the rows where they are givers
-
-grows = ftab[ftab$Contributor.Payee.Committee.ID%in%gands,] 
-#find the rows where they are recievers
-rrows = ftab[ftab$Filer.ID%in%gands,] 
-
-#check an individual value, 73
-#filer 73 is "Regence Oregon Political Action Committee"
-#look at the records of 73 recieving
-dim(ftab[ftab[,11]==73,])
-head(ftab[ftab[,11]==73,])
-#look at the records of them giving
-dim(ftab[ftab[,10]==73,])
-head(ftab[ftab$Contributor.Payee.Committee.ID=="73",])
-
-73%in%wfrom$Contributor.Payee.Committee.ID
-head(wfrom[wfrom$Contributor.Payee.Committee.ID==73,])
 
 
 
+getCommitteeZipCodes<-function(){
+	
+	query="select * from comms"
+	
+	dbres = dbiRead(query=query, dbname="contributions")
+	
+	canzips = sapply(X=dbres$Candidate_Maling_Address, FUN=extractZip)
+	names(canzips)<-NULL
+	
+	tresZips1 = sapply(X=dbres$Treasurer_Mailing_Address, 
+										 FUN=extractZip)
+	names(tresZips1)<-NULL
+	tresZips = tresZips1
+	tresZips[!is.na(canzips)] = canzips[!is.na(canzips)]
+	
+	write.table(x=cbind.data.frame(candidate_id=dbres$Committee_Id, zip=tresZips), sep="\t",
+							quote=F,row.names=F, col.names=T,
+							file="./tresZips_candWhereAvailable.txt")
+	write.table(x=cbind.data.frame(candidate_id=dbres$Committee_Id, zip=tresZips1), sep="\t",
+							quote=F,row.names=F, col.names=T,
+							file="./tresZips.txt")
+}
+
+
+
+test.extractZip<-function(){
+	tadd = "15716 SE Millmain DR Portland OR 97233"
+	checkEquals(target="97233", current=extractZip(addr=tadd))
+	tadd = "15716 SE Millmain DR Portland OR    97233"
+	checkEquals(target="97233", current=extractZip(addr=tadd))
+	
+	tadd = "15716 SE Millmain DR Portland OR \t 97233"
+	checkEquals(target="97233", current=extractZip(addr=tadd))
+}
+
+extractZip<-function(addr){
+	addr = gsub(pattern="[ ]+", replacement=" ", x=addr)
+	addr = gsub(pattern="[\t]", replacement=" ", x=addr)
+	sadd = strsplit(x=addr, split=" ")[[1]]
+	zipout = sadd[[length(sadd)]]
+	return(zipout)
+	# 	gsub(pattern="^[0-9]+ [a-zA-Z ]+", replacement="", x=addr, perl=T)
+}
 
 
 

@@ -1,15 +1,9 @@
 #eda.R
+library('RJSONIO')
+library('RUnit')
+source('~/prog/hack_oregon/EDAfunctions.R')
 
 
-fins = read.table(header=T, 
-									comment.char="",
-									stringsAsFactors=F,
-					 				sep="\t",
-					 				file="./orestar/fins/joinedTables.tsv")
-
-
-cat("Data dimensions:")
-print(dim(fins))
 
 colnames(fins)
 # > colnames(fins)
@@ -214,6 +208,50 @@ head(ftab[,c(32,33)])
 
 
 head(ftab[,c(grep(pattern="date", x=colnames(ftab), ignore.case=T))])
+
+######## from edaAndCleaning
+
+#get simple interaction format going
+
+tfbyID = getFromToAmountTable(ftab) 
+
+blanki = tfbyID$from=="" | is.na(tfbyID$from)
+
+withFromIds = tfbyID[!blanki,]
+wfrom = ftab[!blanki,]
+
+gs = withFromIds[,c(1,2)]
+
+#how many givers are also recievers?
+
+givers = unique(gs$from)
+
+recievers = unique(gs$to)
+
+gands = intersect(givers, recievers)
+
+length(gands)
+# > length(gands)
+# [1] 693 givers are also recievers
+
+#find the rows where they are givers
+
+grows = ftab[ftab$Contributor.Payee.Committee.ID%in%gands,] 
+#find the rows where they are recievers
+rrows = ftab[ftab$Filer.ID%in%gands,] 
+
+#check an individual value, 73
+#filer 73 is "Regence Oregon Political Action Committee"
+#look at the records of 73 recieving
+dim(ftab[ftab[,11]==73,])
+head(ftab[ftab[,11]==73,])
+#look at the records of them giving
+dim(ftab[ftab[,10]==73,])
+head(ftab[ftab$Contributor.Payee.Committee.ID=="73",])
+
+73%in%wfrom$Contributor.Payee.Committee.ID
+head(wfrom[wfrom$Contributor.Payee.Committee.ID==73,])
+
 
 
 

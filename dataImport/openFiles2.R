@@ -1,230 +1,228 @@
 #hackOregon
-if(!require("gdata")){
-	install.packages("gdata")
-	library("gdata")
-}
-
-if(!require("R.utils")){
-	install.packages("R.utils")
-	library("R.utils")
-}
-library("dplyr")
+source('~/prog/hack_oregon/dataImport/finDataImport.R')
 
 
-read.finance.txt<-function(fname){
-	return(read.table(file=fname,
-										allowEscapes=T,
-										 strip.white=T,
-										 comment.char="",
-										 check.names=F,
-										 header=T, 
-										 sep="\t", 
-										 stringsAsFactors=F))
-}
+comtab = read.table(file="./orestar/comms/joinedTables.tsv", sep="\t", header=T, stringsAsFactors=F)
 
-write.finance.txt<-function(dat,fname){
-	write.table(x=dat,file=fname, 
-							append=F, 
-							quote=T, 
-							sep="\t", 
-							row.names=F, 
-							col.names=T, 
-							qmethod="escape")
-}
 
-importAllXLSFiles<-function(indir="~/prog/hack_oregon/orestar/fins", 
-														outsuffix=".txt", destDir=NULL, forceImport=F){
+unique(comtab$Committee.Type)
+
+
+fintab = read.table(file="./orestar/fins/joinedTables.tsv", sep="\t", header=T, stringsAsFactors=F)
+
+#subset fintab
+
+donorIn = fintab$Contributor.Payee.Committee.ID%in%comtab$Committee.Id
+
+donly = fintab[donorIn,]
+nonCom= fintab[!donorIn,]
+
+#for the non-com: aggregate by total amount
+
+dset  = nonCom$Amount
+
+
+breaksBins<-function(dset,bpoints = c(1,10,100, 1000, 10000)){
 	
-	indir = gsub(pattern="[/]$", replacement="", x=indir)
-	
-	if(is.null(destDir)){
-		destDir = paste0(indir,"/RecordsConvertedToTxt")
-		dir.create(path=destDir, showWarnings=F, recursive=T)
+	res = rep(0, times=length(dset))
+	for(i in 1:length(bpoints)){
+		res[dset>i] = 
 	}
 	
-	destDir = gsub(pattern="[/]$", replacement="", x=destDir)
-	
-	
-	errorDir=paste0(indir,"/problemSpreadsheets")
-	dir.create(path=errorDir, showWarnings=F,recursive=T)
-	
-	curtab=NULL
-	
-	fulltab = NULL
-	files = dir(indir)
-	
-	errorlog = c()
-	errorFileNames = c()
+}
 
-	files = files[grepl(pattern=".xls$", files)]
-	convertedFileNames = gsub(pattern=".xls",replacement=".txt",x=files)
+btt = table(fintab$Book.Type)
+
+bttC = aggregate(x=fintab$Amount, by=list(fintab$Book.Type), FUN=sum)
+
+
+
+bttCv  = bttC$x
+names(bttCv)<-bttC$Group.1
+
+summarize_by(col=fintab$Book.Type, 
+						 display=T,
+						 barPlotTitle="The contents of the Book.Type column")
+
+
+hbarplot(barDict=bttCv, 
+				 maxLevels = 15,
+				 barPlotTitle="Money from each group", 
+				 left_margin_factor=1)
+
+par(oldmar)
+print(out)
+
+plot(btt, y=bttCv)
+
+pcodesCounts = table(fins$Purpose.Codes)
+
+pcodesCounts = pcodesCounts[order(pcodesCounts, decreasing=T)]
+
+psub  = fins[fins$Purpose.Codes%in%names(head(pcodesCounts, 10)),]
+
+summarize_by(col=psub$Purpose.Codes, 
+						 display=T, 
+						 barPlotTitle="Counts of Purpose.Codes",
+						 left_margin_factor=1.2)
+
+pcA = aggregate(x=fins$Amount, by=list(fins$Purpose.Codes), FUN=sum)
+
+pcaD = pcA$x
+names(pcaD) = pcA$Group.1
+
+pcaD = pcaD[names(pcaD)!=""]
+
+hbarplot(barDict=pcaD, 
+				 maxLevels = 15,
+				 barPlotTitle="Money vs purpose", 
+				 left_margin_factor=1)
+
+
+cleanFins = fins[fins$Amount>=1,]
+
+forR = aggregate(x=cleanFins$Amount, by=list(cleanFins$Book.Type,cleanFins$Contributor.Payee), FUN=sum)
+
+colnames(forR)<-c("Book.Type","Entity","Aggregate.Amount")
+
+uType = unique(forR$Book.Type)
+
+
+
+getTopAggregate1<-function(agdf,numberPer,colname="Book.Type"){
 	
-	for(i in 1:length(files)){	
+	rownames(agdf)<-1:nrow(agdf)
+	uVal = unique(agdf[,colname])
+	exRows = rep(F, times=nrow(agdf))
+	histSet = list()
+	
+	
+	
+	for(i in 1:length(uVal)){
+		cat("\nCurrent book type: \"", uVal[i],"\"\n")
+		#pull all the rows out
+		valrows = agdf[,colname] == uVal[i]
+		#save the hist for latter
+		histSet[[uVal[i]]] = hist(log(agdf$Aggregate.Amount[valrows], base=10), plot=F)
+		#figure out which are the 25 top rows
+		if()
+			#find the top 25 values
+		top25Rows = rownames(agdf[valrows,])[order(agdf$Aggregate.Amount[valrows], decreasing=T)][1:numberPer]
 		
-		srce = paste(indir, files[i], sep="/") 
-		dest = paste(destDir, convertedFileNames[i], sep="/")
-		cat("\nchecking", files[i],"..")
-		if(!file.exists(dest)|forceImport){
-			curtab = try(expr=read.xls(xls=srce, comment.char="",quote="",
-																 stringsAsFactors=F, 
-																 method="tab"), silent=TRUE)
-			if(is.null(nrow(curtab))){
-				cat("..error while reading file\n")
-				addToErrorLog(errorLogFname=paste0(errorDir,"/","errorLog.txt"),
-											vals=c(paste("read.xls error:", curtab), 
-														 files[i]))
-				#move file to error folder
-				file.rename(from=srce, to=paste(errorDir, basename(path=srce), sep="/"))
-			}else{
-				cat("..opened, attempting save..")
-				write.finance.txt(dat=curtab, fname=dest)
-# 				write.table(x=curtab, 
-# 										qmethod="escape",
-# 										col.names=T, 
-# 										row.names=F, 
-# 										quote=T,
-# 										file=dest,
-# 										sep="\t")
-# 				testread = try(   read.table(file=dest,
-# 														 strip.white=T,
-# 														 comment.char="",
-# 														 check.names=F,
-# 														 header=T, 
-# 														 sep="\t", 
-# 														 stringsAsFactors=F))
-				testread = try(read.finance.txt(dest), silent=T)
-				
-				if(is.null(nrow(testread))){
-					cat("..error while reading file\n")
-					addToErrorLog(errorLogFname=paste0(errorDir,"/","errorLog.txt"),vals=c(paste("re read error:", testread), 
-															 files[i]))
-					#move files to error folder
-					file.rename(from=dest, to=paste(errorDir, basename(path=dest), sep="/"))
-					file.rename(from=srce, to=paste(errorDir, basename(path=srce), sep="/"))
-				}
-			}
-		}else{
-			cat("the converted file already exists\n")
-		}#	if(!file.exists(dest))
-	}#for
+		cmin = range(agdf$Aggregate.Amount[valrows][order(agdf$Aggregate.Amount[valrows], decreasing=T)[1:25]])[1]
 		
-	errorTab = cbind.data.frame(errorlog, errorFileNames)
 		
-	write.table(x=errorTab, 
-							file=paste0(errorDir, "errorLogTable.txt" ), 
-							col.names=F, 
-							row.names=F, 
-							sep="\t", 
-							quote=T)
-	
-	return(fulltab)
-}
-	
-addToErrorLog<-function(vals, errorLogFname){
-	
-	if(dirname(errorLogFname)!="."&!file.exists(dirname(errorLogFname))){
-		dir.create(path=dirname(errorLogFname), showWarnings=F, recursive=T)
-	}
-	
-	if(file.exists(errorLogFname)){
-		elog = try(expr=read.table(file=errorLogFname, 
-											header=F, 
-											sep="\t",
-											stringsAsFactors=F, 
-											comment.char=""), silent=T)
-		if(is.null(nrow(elog))){
-			elog = as.data.frame(matrix(vals, nrow=1, dimnames=list(NULL,NULL)))
-		}else{
-			elog = rbind.data.frame(elog, vals)
-			elog=unique(elog)
-		}
-
-	}else{
-		elog = as.data.frame(matrix(vals, nrow=1, dimnames=list(NULL,NULL)))
-		dir.create(path=basename(path=errorLogFname), recursive=T, showWarnings=F)
-	}
-	print(errorLogFname)
-	write.table(x=elog,
-							sep="\t", 
-							col.names=F, 
-							row.names=F,
-							file=errorLogFname)
-	
-}
-
-# folderName="/Users/samhiggins2001_worldperks/prog/hack_oregon/orestar/comms"
-
-mergeTxtFiles<-function(folderName="/Users/samhiggins2001_worldperks/prog/hack_oregon/orestar/fins"){
-	
-	allFiles = dir(folderName)
-	txtFiles = allFiles[grepl(pattern=".txt$", x=allFiles, ignore.case=F, perl=T)]
-	txtFiles = txtFiles[txtFiles!="problemSpreadsheetserrorLogTable.txt"]
-	txtfilesfp = paste0(folderName,"/",txtFiles)
-
-	totalLines = countLinesAllFiles(folderName=folderName)
-	totalLines = totalLines-length(txtfilesfp)
-
-	
-	#make output data frame
-	testRead = read.finance.txt(txtfilesfp[1])
-
-	tabout = data.frame(matrix(data="", nrow=totalLines, ncol=ncol(testRead), dimnames=list(NULL, colnames(testRead))), stringsAsFactors=F)
-	curline = 1
-	for(i in 1:length(txtfilesfp)){
 		
-		#open the file
-		tabin = read.finance.txt(txtfilesfp[i])
-		#add contents of file to tabout
-		if(nrow(tabin)){
-			tabout[curline:(curline+nrow(tabin)-1),] = tabin
-		}else{
-			cat("\nBlank table:",txtfilesfp[i],"\n")
-		}
-		cat(i, txtfilesfp[i],"rows:",nrow(tabin),"\n")
-		curline = curline + nrow(tabin)
+		
 	}
-	#now cut off the data frame so that no blank rows are included
-	tabout = tabout[1:curline-1,]
-
-	cat("Total dimensions of merged file:", dim(tabout)[1],"rows", dim(tabout)[2],"columns")
 	
-	write.table(x=tabout, sep="\t",col.names=T, row.names=F, qmethod="escape",quote=T,
-							file=paste0(folderName, "/joinedTables.tsv"))
-	
-	return(tabout)
 }
 
-countLinesAllFiles<-function(folderName){
-	allFiles = dir(folderName)
-	txtFiles = allFiles[grepl(pattern=".txt$", x=allFiles, ignore.case=F, perl=T)]
-	txtFiles = txtFiles[txtFiles!="problemSpreadsheetserrorLogTable.txt"]
-	txtfilesfp = paste0(folderName,"/",txtFiles)
-	
-	#find the size of the needed data frame
-	totalLines = 0
-	lpf = c()
-	for(i in 1:length(txtfilesfp)){
-		clen = countLines(txtfilesfp[i])
-		lpf = c(lpf, clen)
-		totalLines = totalLines + clen
-		cat("file", txtfilesfp[i], "length", clen, "....\n")
-	}
-	cat("Warning: this function can only provide a conservative estimate of the number of lines in a file. It")
-	cat("counts the number of lines in a text file by counting the number of occurances of platform-independent\n",
-			"newlines (CR, LF, and CR+LF [1]), including a last line with neither. An empty file has zero lines.\n")
-	
-	return(totalLines)
-}
-
-readFinData<-function(fname){
-	tabin = read.table(file=fname,
-										 strip.white=T,
-										 comment.char="",
-										 check.names=F,
-										 header=T, 
-										 sep="\t", 
-										 stringsAsFactors=F)	
-	return(tabin)
-}
+boxplot(x=distSet, 
+				width = ag2$x,
+				notch=T, 
+				las=2, 
+				horizontal=T, 
+				xlab="log10(contribution amount)", 
+				main="Distributions of contribution amounts per book type\n box height = number of different contributions")
 
 
+# 
+# 
+# hist(x=log(agdf$Aggregate.Amount[valrows]), axis=function(...){},
+# 		 main=paste("Distribution of contribution amounts for all contributors of type \"",uVal[i],"\""))
+# 
+# ggplot(agdf$Aggregate.Amount[valrows], aes(x = agdf$Aggregate.Amount[valrows])) + geom_histogram() + scale_x_log()
+# 
+# mydata_hist = hist(agdf$Aggregate.Amount[valrows], plot=F)
+# plot(mydata_hist$count, log="y", type='h', lwd=10, lend=2)
+# 
+# hist.data$counts = log(hist.data$counts, 2)
+# plot(hist.data)
+# 
+# breaks=10
+# mdat = agdf$Aggregate.Amount[valrows]
+# buckets <- seq(from=range(mdat)[1],to=range(mdat)[2], length.out=breaks)
+# log(buckets)
+# mydata_hist <- hist(agdf$Aggregate.Amount[valrows], plot=FALSE)
+# bp <- barplot(mydata_hist$count, log="y", col="white", names.arg=buckets)
+# text(bp, mydata_hist$counts, labels=mydata_hist$counts, pos=1)
+
+
+
+
+# 	
+# fullname = paste(indir, files[fn], sep="/")
+# fullOutName = paste
+# cat("\nFile",fn,"of",length(files),fullname, "size:", as.character(as.numeric(file.info(fullname)$size)/1000000), "Mb")
+# cat("..reading..")
+# curtab = try(expr=read.xls(xls=fullname, stringsAsFactors=F), silent=TRUE)
+# if(is.null(nrow(curtab))){
+# 	errorlog=c(errorlog, paste(curtab, fullname))
+# }else{
+# 	cat("..appending..")
+# 	if(nrow(curtab)){
+# 		write.table(x=curtab, 
+# 								quote=F,
+# 								file=outfile,
+# 								sep="\t", 
+# 								col.names=!file.exists(outfile), 
+# 								row.names=F, 
+# 								append=T)
+# 		read.table(file=outfile, sep="\t")
+# 	}
+# }
+# 
+# 
+# 	
+# 	
+# 	
+# 
+# outfile="~/prog/hack_oregon/orestar/fins/joinedTable.txt"
+# 
+# allFins = importAllXLSFiles(indir="~/prog/hack_oregon/orestar/fins", outfile="~/prog/hack_oregon/orestar/fins/joinedTable.txt")
+# 
+# allFins[35843,]
+# #subtract line 35802:
+# badRows=c(35802,35804)
+# 
+# allFins[allFins$Tran.Id=="1438143",]
+# 
+# allFins2 = allFins[!1:nrow(allFins)%in%badRows,]
+# 
+# 
+# write.table(x=allFins2,
+# 						file=outfile, 
+# 						append=F,
+# 						quote=T, 
+# 						sep="\t", 
+# 						row.names=F, 
+# 						col.names=T)
+# 
+# curtab = read.table(file=outfile,
+# 										comment.char="",
+# 										check.names=F,
+# 										header=T, 
+# 										sep="\t", 
+# 										stringsAsFactors=F)
+
+
+
+# copyQuery1 = ""
+# copyQuery2 = 
+# 
+# dbCall(sql=, dbname=contributions)
+
+# 
+# # iris.xls is included in the gregmisc package for use as an example
+# xlsfile <- file.path(path.package('gdata'),'xls','iris.xls')
+# xlsfile
+# 
+# iris <- read.xls(xlsfile) # defaults to csv format
+# iris <- read.xls(xlsfile,method="csv") # specify csv format
+# iris <- read.xls(xlsfile,method="tab") # specify tab format
+# 
+# head(iris)  # look at the top few rows
+# 
+# 
+# iris <- read.xls(xlsfile, perl="/usr/bin/perl")
