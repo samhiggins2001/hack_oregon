@@ -1,6 +1,11 @@
 #dbi
 
-dbiWrite<-function(tabla, name="test_table", append=F, dbname="interactome", port="5432", clean = T ){
+dbiWrite<-function(tabla, 
+									 name="test_table", 
+									 append=F, 
+									 dbname="interactome", 
+									 port="5432", 
+									 clean = T ){
   if(name =="test_table")
   {
     print("warning, writing table data to test_table")
@@ -112,8 +117,6 @@ fileToDb<-function(tableName, dbname,  fname, app=F, sep=NULL, header=NULL, quot
 	dbCall(sql=query, dbname=dbname, port=port)
 	
 }
-
-
 
 
 makeStacked<-function(dfin){
