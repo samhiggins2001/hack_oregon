@@ -4,6 +4,39 @@ if(!require("grDevices")){
 	library("grDevices")
 }
 
+library("data.table")
+
+
+
+dataCleaningProcedure<-function(){
+	
+	tabname = "fins"
+	q1 = paste0("SELECT * FROM ", tabname)
+	
+	
+	restab1 = dbiRead(query=q1, dbname="contributions")
+	
+	#remove white space
+	
+	restab1$Contributor_Payee = unifyEntities(col=restab1$Contributor_Payee)
+	
+	
+	dbiWrite(tabla=restab1, name="fins", append=F, dbname="contributions")
+	
+}
+
+
+makeUniqueContributorColumn<-function(){
+	
+	genericNames = c("Miscellaneous Cash Contributions $100 and under ",
+	"Miscellaneous Cash Expenditures $100 and under",
+	"Miscellaneous Personal Expenditures $100 and under",
+	"",
+	"Miscellaneous In-Kind Contributions $100 and under")
+	
+}
+
+
 test.fixVals<-function(){
 	
 	col="years"
@@ -169,30 +202,6 @@ fixHeaders<-function(tab){
 }
 
 
-#getMiddleMen
-#takes ftab: the fins table; campaing finance contributions; must have columns: Contributor.Payee.Committee.ID, Filer.Id and Amount 
-#returns: a vector of ids for all entities that both give and recieve donations
-getMiddleMen<-function(ftab){
-	
-	tfbyID = getFromToAmountTable(ftab) 
-	
-	blanki = tfbyID$from=="" | is.na(tfbyID$from)
-	
-	withFromIds = tfbyID[!blanki,]
-	wfrom = ftab[!blanki,]
-	
-	gs = withFromIds[,c(1,2)]
-	
-	#how many givers are also recievers?
-	
-	givers = unique(gs$from)
-	
-	recievers = unique(gs$to)
-	
-	gands = intersect(givers, recievers)
-
-	return(gands)
-}
 
 #isBlank
 #takes: col: vector of values to be checked for ("" or NA)
