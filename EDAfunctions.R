@@ -50,4 +50,113 @@ getFromToAmountTable<-function(ftab, fromColName="Contributor.Payee.Committee.ID
 	return(outTab)
 }
 
+#getMiddleMen
+#takes ftab: the fins table; campaing finance contributions; must have columns: Contributor.Payee.Committee.ID, Filer.Id and Amount 
+#returns: a vector of ids for all entities that both give and recieve donations
+getMiddleMen<-function(ftab){
+	
+	tfbyID = getFromToAmountTable(ftab) 
+	
+	blanki = tfbyID$from=="" | is.na(tfbyID$from)
+	
+	withFromIds = tfbyID[!blanki,]
+	wfrom = ftab[!blanki,]
+	
+	gs = withFromIds[,c(1,2)]
+	
+	#how many givers are also recievers?
+	
+	givers = unique(gs$from)
+	
+	recievers = unique(gs$to)
+	
+	gands = intersect(givers, recievers)
+	
+	return(gands)
+}
+
+makeSifTable<-function(){
+	
+	tabname = "sif1"
+	q1 = paste0("SELECT * FROM ", tabname)
+	
+	restab1 = dbiRead(query=q1, dbname="contributions")
+	
+	sif1 = restab1[,c("Tran_Id","Tran_Date","comm_id","other_entity","type","Amount")]
+	
+	sif1$other_entity  = unifyEntities(sif1$other_entity)
+	
+	sif = sif1
+	#swap the entities with sub_type in revTypes
+	revTypes = c('Cash Expenditure','Miscellaneous Other Disbursement','Expenditure Made by an Agent','Miscellaneous Other Receipt','Personal Expenditure for Reimbursement')
+	revRows = sif1$Sub_Type%in%revTypes
+	sif$comm_id[revRows] = sif1$other_entity[revRows]
+	sif$other_entity[revRows] = sif1$comm_id[revRows]
+	
+	colnames(sif)<-c("Tran_Id","date","money_from","money_to","Sub_Type","Amount")
+	
+	dbiWrite(tabla=sif, name="sif", append=F, dbname="contributions")
+	
+	sifsub = sif[,c("date","money_from","money_to","Amount")]
+	print(dim(sifsub))
+	print(dim(unique(sifsub)))
+	
+	sifsub = sifsub[!duplicated(x=sifsub),]
+	
+	dbiWrite(tabla=sifsub, 
+					 name="ssif", 
+					 append=F, 
+					 dbname="contributions")
+	
+	
+}
+
+
+makeNameMapCol<-function(){
+	
+	tabname = "comms"
+	q1 = paste0("SELECT * FROM ", tabname)
+	comtab = dbiRead(query=q1, dbname="contributions")
+	
+	tabname = "sif"
+	q2 = paste0("SELECT * FROM ", tabname)
+	siftab = dbiRead(query=q2, dbname="contributions")
+	
+	tabname = "fins"
+	q3 = paste0("SELECT * FROM ", tabname)
+	fintab = dbiRead(query=q3, dbname="contributions")
+	
+	idv = c()
+	namev = c()
+	#1st, get all the names together
+	
+	#1 from the comms table
+	idv = c(idv, comtab$Committee_Id)
+	namev = c(namev, comtab$Committee_Name)
+	
+	#2 from the fins table
+	idv = c(idv, fintab$Filer_Id)
+	namev = c(namev, fintab$Filer)
+	#3 from the sif1 table 
+	idv = c(idv, siftab$money_to)
+	namev = c(namev, siftab$money_to)
+	idv = c(idv, siftab$money_from)
+	namev = c(namev, siftab$money_from)
+	
+	dupids = duplicated(x=idv)
+	
+	idout  = idv[!dupids]
+	namevout = namev[!dupids]
+	
+	namevout   = namevout[!is.na(idout)]
+	idout = idout[!is.na(idout)]
+	
+	tabout = cbind.data.frame(idout, namevout)
+	
+	dbiWrite(tabla=tabout,
+					 name="idToName", 
+					 append=F, 
+					 dbname="contributions")
+	
+}
 
