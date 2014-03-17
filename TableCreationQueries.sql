@@ -23,11 +23,10 @@ select "Committee_Id", "Committee_Name","Committee_Type","Filing_Date","Organiza
 "Treasurer_Mailing_Address","Treasurer_Fax","Measure"
 from comms;
 
-select * from fins limit 100
+select * from fins limit 1000
 select * from comms
 
 
-w
 alter table fins
 alter column "Amount" type numeric
 	using "Amount"::numeric
@@ -38,6 +37,10 @@ alter column "Aggregate_Amount" type numeric
 
 select * from fins limit 100
 
+drop table donors1;
+create table donors as
+select "Contributor_Payee"as "name", "Contributor_Payee_Committee_ID" as "id", "Addr_Line1","City", "State","Zip", "Book_Type"
+from fins;
 
 /*make a table of donating entities and, if possible,their ids*/
 drop table donors;
@@ -66,3 +69,66 @@ select * from udonors;
 
 delete from udonors
 where "name" is null
+
+select "Book_Type", count("Tran_Id") from fins group by "Book_Type"
+
+
+limit 100
+
+select * from comms limit 100
+
+select * from fins where "Tran_Id" = '97298'
+
+
+drop table sif1;
+create table sif1 as
+select "Tran_Id","Tran_Date", "Filer_Id" as "comm_id", "Contributor_Payee_Committee_ID" as "other_entity", "Sub_Type" as "type", "Contributor_Payee" as "other_entitys_name", "Amount"
+from fins;
+
+update sif1
+set "other_entity" = "other_entitys_name" 
+where "other_entity" is null;
+
+update sif1
+set "other_entity" = "type"
+where "other_entity" is null
+
+select * from sif1 limit 1000;
+
+select "Sub_Type", count("Tran_Id"), sum("Amount") from fins 
+where "Contributor_Payee" is null
+group by "Sub_Type"
+
+select * 
+from fins 
+where "Tran_Id" 
+in
+	(select "Tran_Id" 
+	from sif1 
+	where "other_entity" is null)
+
+
+/*make a unique id-name mapper: 
+	first get the list of committee names and ids from the comms table
+	second, get the list of */
+
+
+select * from fins 
+where "Contributor_Payee_Committee_ID" 
+not in 	(select "Committee_Id" 
+	from comms)
+and "Contributor_Payee_Committee_ID" is not null
+/*6821 rows*/
+
+select * from fins 
+where "Contributor_Payee_Committee_ID" 
+in 	(select "Committee_Id" 
+	from comms)
+and "Contributor_Payee_Committee_ID" is not null
+/*56538 rows*/
+
+
+select * from ssif 
+where money_from in 
+	(select distinct "Sub_Type" from fins)
+
