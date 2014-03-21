@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<head>
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <link href='http://fonts.googleapis.com/css?family=Merriweather' rel='stylesheet' type='text/css'>
+  <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+</head>
+<style>
+
+path {
+  stroke: #fff;
+  fill-rule: evenodd;
+}
+
+body {
+  font-family: "Merriweather", 'Open Sans', sans-serif;
+  width: 960px;
+}
+
+text {
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+}
+
+</style>
+<body></body>
+   
+    <script>
+
+        var width = 1000,
+        height = 800,
+        radius = Math.min(width, height) / 2;
+
+        var x = d3.scale.linear()
+        .range([0, 2 * Math.PI]);
+
+        var y = d3.scale.linear()
+        .range([0, radius]);
+
+        var color = d3.scale.category20c();
+        //var color = d3.scale.category20c();
+//Color control
+//Primary Pallette
+        var color = d3.scale.ordinal()
+                  .domain([0,15000000])
+                  //.range([ "#64BCBB", "#49A14C", "#10716F", "#67576A"]);
+                  //Alternate color scheme with 8 hour
+                  //.range([ "#C89C60", "#64BCBB", " #72AE69", "#10716F", "#67576A",  "#C89C60", "#49A14C", "#C3645E"]);
+                  .range([ "#64BCBB", "#49A14C", "#10716F", "#A3D3D2", "#49A14C", "#72AE69", "#B5D0AB", "#D8E4D1", "#67576A"
+                    ]);
+
+        var svg = d3.select("body").append("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .append("g")
+            .attr("transform", "translate(" + width / 2 + "," + (height / 2 + 10) + ")");
+
+        var partition = d3.layout.partition()
+            .value(function(d) { return d.amount; });
+    
+
+        var arc = d3.svg.arc()
+            .startAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, x(d.x))); })
+            .endAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, x(d.x + d.dx))); })
+            .innerRadius(function(d) { return Math.max(0, y(d.y)); })
+            .outerRadius(function(d) { return Math.max(0, y(d.y + d.dy)); });
+
+        d3.json("data/civic_data5_type2.json", function(error, root) {
+            var g = svg.selectAll("g")
+            .data(partition.nodes(root))
+            .enter().append("g");
+
+            var path = g.append("path")
+                .attr("d", arc)
+                .style("fill", function(d, i) { return color(i); })
+                .on("click", click);
+
+            var text = g.append("text")
+                .attr("transform", function(d) { return "translate(" + arc.centroid(d) + ")rotate(" + computeTextRotation(d) + ")"; })
+                .attr('text-anchor', function (d) { return computeTextRotation(d) > 180 ? "end" : "start"; })
+                .attr("dx", "0") // margin
+                .attr("dy", ".35em") // vertical-align
+                .text(function(d) { return d.name; });
+
+            function click(d) {
+                // fade out all text elements
+                text.transition().attr("opacity", 0);
+
+                path.transition()
+                .duration(750)
+                .attrTween("d", arcTween(d))
+                .each("end", function(e, i) {
+                      // check if the animated element's data e lies within the visible angle span given in d
+                      if (e.x >= d.x && e.x < (d.x + d.dx)) {
+                          // get a selection of the associated text element
+                          var arcText = d3.select(this.parentNode).select("text");
+                          // fade in the text element and recalculate positions
+                          arcText.transition().duration(750)
+                          .attr("opacity", 1)
+                          .attr("transform", function(d) { return "translate(" + arc.centroid(d) + ")rotate(" + computeTextRotation(d) + ")"; })
+                          .attr('text-anchor', function (d) { return computeTextRotation(d) > 180 ? "end" : "start"; })
+                      }
+                });
+            }
+        });
+
+        d3.select(self.frameElement).style("height", height + "px");
+
+        // Interpolate the scales!
+        function arcTween(d) {
+            var xd = d3.interpolate(x.domain(), [d.x, d.x + d.dx]),
+            yd = d3.interpolate(y.domain(), [d.y, 1]),
+            yr = d3.interpolate(y.range(), [d.y ? 20 : 0, radius]);
+            return function(d, i) {
+                return i
+                ? function(t) { return arc(d); }
+                : function(t) { x.domain(xd(t)); y.domain(yd(t)).range(yr(t)); return arc(d); };
+            };
+        }
+
+        function computeTextRotation(d) {
+            var ang = (x(d.x + d.dx / 2) - Math.PI / 2) / Math.PI * 180;
+            return (ang > 90) ? 180 + ang : ang;
+        }
+
+    </script>
+
