@@ -1,0 +1,406 @@
+{
+ "amount": 1.2157e+08,
+"count":  14208,
+"name": "Amount By Book_Type",
+"children": [
+ {
+ "amount": 4.3956e+07,
+"count":   2267,
+"name": "Business Entity",
+"children": [
+ {
+ "amount": 1.2418e+07,
+"count":     72,
+"name": "The New Media Firm" 
+},
+{
+ "amount": 4.9789e+06,
+"count":     15,
+"name": "Multi Media Services Corporation" 
+},
+{
+ "amount": 4.8561e+06,
+"count":    150,
+"name": "Media Analysis, Inc." 
+},
+{
+ "amount": 4.5425e+06,
+"count":     87,
+"name": "Media Analysis" 
+},
+{
+ "amount": 4.4933e+06,
+"count":    285,
+"name": "Winning Mark" 
+},
+{
+ "amount": 3.4395e+06,
+"count":     80,
+"name": "George Advertising, Inc." 
+},
+{
+ "amount": 2.9698e+06,
+"count":    788,
+"name": "Gateway Communications, Inc." 
+},
+{
+ "amount": 2.2905e+06,
+"count":    157,
+"name": "Compass Media Group" 
+},
+{
+ "amount": 2.2075e+06,
+"count":    371,
+"name": "New Media Northwest" 
+},
+{
+ "amount": 1.7601e+06,
+"count":    262,
+"name": "Lynx Group Inc." 
+} 
+] 
+},
+{
+ "amount": 2.4802e+06,
+"count":    202,
+"name": "Candidates Immediate Family",
+"children": [
+ {
+ "amount": 5.9722e+05,
+"count":     38,
+"name": "Deborah J. Alley" 
+},
+{
+ "amount": 4.16e+05,
+"count":     17,
+"name": "Edward T. Wheeler" 
+},
+{
+ "amount": 3.36e+05,
+"count":     10,
+"name": "Eileen Brady" 
+},
+{
+ "amount": 2.4289e+05,
+"count":     26,
+"name": "Mike McKeel" 
+},
+{
+ "amount": 2.3229e+05,
+"count":     32,
+"name": "Knute Buehler, Dr." 
+},
+{
+ "amount": 1.8265e+05,
+"count":      8,
+"name": "Katrina Wheeler" 
+},
+{
+ "amount": 1.358e+05,
+"count":     45,
+"name": "Lynn A. Peterson" 
+},
+{
+ "amount": 1.3052e+05,
+"count":     12,
+"name": "Billie Monroe" 
+},
+{
+ "amount": 1.0436e+05,
+"count":      8,
+"name": "Hanten Day" 
+},
+{
+ "amount": 1.0242e+05,
+"count":      6,
+"name": "William Barton" 
+} 
+] 
+},
+{
+ "amount": 6.2219e+06,
+"count":    515,
+"name": "Individual",
+"children": [
+ {
+ "amount": 1.5543e+06,
+"count":     29,
+"name": "Loren Parks" 
+},
+{
+ "amount": 1.0027e+06,
+"count":      5,
+"name": "Azusa Suzuki" 
+},
+{
+ "amount": 9.3273e+05,
+"count":     51,
+"name": "Eric Lemelson" 
+},
+{
+ "amount": 5.5675e+05,
+"count":     17,
+"name": "William Swindells" 
+},
+{
+ "amount": 4.61e+05,
+"count":      5,
+"name": "Loren E Parks" 
+},
+{
+ "amount": 4.5515e+05,
+"count":     24,
+"name": "Winthrop McCormack" 
+},
+{
+ "amount": 3.4724e+05,
+"count":     11,
+"name": "Mark Stevens" 
+},
+{
+ "amount": 3.096e+05,
+"count":     27,
+"name": "Win McCormack" 
+},
+{
+ "amount": 3.0243e+05,
+"count":    344,
+"name": "Jonathan E Thompson" 
+},
+{
+ "amount":  3e+05,
+"count":      2,
+"name": "Phillip Knight" 
+} 
+] 
+},
+{
+ "amount": 1.667e+07,
+"count":    475,
+"name": "Labor Organization",
+"children": [
+ {
+ "amount": 6.8797e+06,
+"count":     46,
+"name": "Oregon Education Association" 
+},
+{
+ "amount": 1.919e+06,
+"count":     28,
+"name": "SEIU Local 503" 
+},
+{
+ "amount": 1.818e+06,
+"count":     34,
+"name": "American Federation of Teachers-Oregon Solidarity Fund" 
+},
+{
+ "amount": 1.3166e+06,
+"count":    199,
+"name": "Oregon AFSCME Council 75" 
+},
+{
+ "amount": 1.1886e+06,
+"count":     10,
+"name": "Oregon School Employees Assn" 
+},
+{
+ "amount": 9.5e+05,
+"count":      3,
+"name": "Service Employees Intl Union" 
+},
+{
+ "amount": 9.1139e+05,
+"count":     27,
+"name": "SEIU COPE" 
+},
+{
+ "amount": 6.0087e+05,
+"count":     45,
+"name": "SEIU LOCAL 503, OPEU" 
+},
+{
+ "amount": 5.6064e+05,
+"count":     54,
+"name": "service Employees International Union Committee on Political" 
+},
+{
+ "amount": 5.2485e+05,
+"count":     29,
+"name": "Clackamas County Peace Officers Association" 
+} 
+] 
+},
+{
+ "amount": 1.0664e+07,
+"count":   1992,
+"name": "Other",
+"children": [
+ {
+ "amount": 3.0186e+06,
+"count":      7,
+"name": "National Education Association" 
+},
+{
+ "amount": 1.181e+06,
+"count":      4,
+"name": "Democratic Governors Association" 
+},
+{
+ "amount": 1.1758e+06,
+"count":    103,
+"name": "Our Oregon" 
+},
+{
+ "amount": 9.8094e+05,
+"count":     88,
+"name": "Winning Mark" 
+},
+{
+ "amount": 8.8352e+05,
+"count":     26,
+"name": "The Library Foundation" 
+},
+{
+ "amount": 8.3686e+05,
+"count":   1110,
+"name": "Payroll Taxes" 
+},
+{
+ "amount": 7.0477e+05,
+"count":      6,
+"name": "Mid-Valley Independent Physicians Association" 
+},
+{
+ "amount": 6.6399e+05,
+"count":     47,
+"name": "Postmaster/Windowline" 
+},
+{
+ "amount": 6.6135e+05,
+"count":    230,
+"name": "Oregon League of Conservation Voters" 
+},
+{
+ "amount": 5.5677e+05,
+"count":    371,
+"name": "Postmaster" 
+} 
+] 
+},
+{
+ "amount": 3.4853e+07,
+"count":   7224,
+"name": "Political Committee",
+"children": [
+ {
+ "amount": 1.0816e+07,
+"count":   1932,
+"name": "Future PAC, House Builders (1524)" 
+},
+{
+ "amount": 5.2667e+06,
+"count":   1769,
+"name": "Promote Oregon Leadership PAC (682)" 
+},
+{
+ "amount": 4.776e+06,
+"count":    680,
+"name": "Senate Democratic Leadership Fund (1471)" 
+},
+{
+ "amount": 2.7231e+06,
+"count":    793,
+"name": "The Leadership Fund (2690)" 
+},
+{
+ "amount": 2.3217e+06,
+"count":    483,
+"name": "Citizen Action for Political Education (33)" 
+},
+{
+ "amount": 2.2781e+06,
+"count":      7,
+"name": "Republican Governors Association Corporate Unlimited Account" 
+},
+{
+ "amount": 1.7046e+06,
+"count":    112,
+"name": "Oregonians Against Job-Killing Taxes (13851)" 
+},
+{
+ "amount": 1.695e+06,
+"count":    452,
+"name": "Friends of Bruce Hanna (4752)" 
+},
+{
+ "amount": 1.6878e+06,
+"count":    434,
+"name": "Oregon Education Association - People for Improvement of Education (142)" 
+},
+{
+ "amount": 1.5845e+06,
+"count":    562,
+"name": "Oregon Health Care Association PAC (275)" 
+} 
+] 
+},
+{
+ "amount": 6.7226e+06,
+"count":   1533,
+"name": "Political Party Committee",
+"children": [
+ {
+ "amount": 3.6178e+06,
+"count":   1158,
+"name": "Democratic Party of Oregon (353)" 
+},
+{
+ "amount": 7.7195e+05,
+"count":     73,
+"name": "Democratic Party of Oregon" 
+},
+{
+ "amount": 7.0405e+05,
+"count":    194,
+"name": "Oregon Republican Party (379)" 
+},
+{
+ "amount": 6.0644e+05,
+"count":     55,
+"name": "Senate Democratic Leadership Fund (1471)" 
+},
+{
+ "amount": 3.5343e+05,
+"count":      8,
+"name": "Democratic Legislative Campaign Committee" 
+},
+{
+ "amount": 2.5e+05,
+"count":      1,
+"name": "Opportunity PAC II" 
+},
+{
+ "amount": 1.2968e+05,
+"count":     19,
+"name": "Working Families Party of Oregon (5528)" 
+},
+{
+ "amount": 1.25e+05,
+"count":      2,
+"name": "Opportunity PAC" 
+},
+{
+ "amount":  99780,
+"count":     14,
+"name": "Future PAC, House Builders (1524)" 
+},
+{
+ "amount":  64471,
+"count":      9,
+"name": "Democratic Party of Oregon " 
+} 
+] 
+} 
+] 
+}
